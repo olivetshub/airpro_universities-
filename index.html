@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FAST-NUCES — AIRPro Smart Campus System</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --g:#006633;--gd:#004d26;--gm:#008844;--gl:#e6f2ec;--gp:#f2f8f4;
+  --border:#dde8e2;--bg:#f3f7f4;--card:#fff;
+  --text:#0f1f14;--t2:#3d5c47;--t3:#7a9a84;
+  --red:#c0392b;--redl:#fdecea;
+  --amber:#c47d0a;--amberl:#fef3e2;
+  --blue:#1a5db5;--bluel:#e8f0fe;
+  --sw:240px;--th:60px;
+  --shadow:0 1px 4px rgba(0,102,51,0.1);
+  --shadow-md:0 4px 20px rgba(0,102,51,0.13);
+  --r:10px;--rl:14px;
+}
+html{font-size:14px;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ═══════════════════════════════
+   LOGIN
+═══════════════════════════════ */
+#loginScreen{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,var(--gd) 0%,var(--g) 60%,var(--gm) 100%);
+  display:flex;align-items:center;justify-content:center;
+}
+.login-card{
+  background:#fff;border-radius:20px;padding:40px 44px;width:400px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.25);text-align:center;
+}
+.login-logo{
+  width:64px;height:64px;border-radius:16px;background:var(--g);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+}
+.login-logo svg{width:36px;height:36px;}
+.login-card h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.login-card p{font-size:12px;color:var(--t3);margin-bottom:28px;}
+.login-err{background:var(--redl);color:var(--red);font-size:12px;font-weight:500;padding:8px 12px;border-radius:8px;margin-bottom:14px;display:none;}
+.login-err.show{display:block;}
+.lf-group{margin-bottom:14px;text-align:left;}
+.lf-group label{font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;}
+.lf-group input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color 0.2s;}
+.lf-group input:focus{border-color:var(--g);}
+.login-btn{width:100%;padding:12px;background:var(--g);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px;transition:background 0.2s;}
+.login-btn:hover{background:var(--gd);}
+.login-hint{margin-top:16px;font-size:11px;color:var(--t3);}
+.login-hint strong{color:var(--t2);}
+.login-footer{margin-top:28px;font-size:11px;color:var(--t3);border-top:1px solid var(--border);padding-top:14px;}
+.login-pills{display:flex;justify-content:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.lp{background:var(--gl);color:var(--g);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;}
+
+/* ═══════════════════════════════
+   APP SHELL
+═══════════════════════════════ */
+#appShell{display:none;min-height:100vh;}
+#appShell.show{display:flex;}
+
+/* ═══════════════════════════════
+   SIDEBAR
+═══════════════════════════════ */
+.sidebar{
+  width:var(--sw);min-height:100vh;
+  background:var(--gd);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;
+  z-index:100;overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.1) transparent;
+}
+.sb-brand{
+  padding:18px 18px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.sb-logo-wrap{
+  width:38px;height:38px;border-radius:10px;background:#fff;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.sb-logo-wrap svg{width:24px;height:24px;}
+.sb-brand-text h2{color:#fff;font-size:14px;font-weight:700;line-height:1.2;}
+.sb-brand-text span{color:rgba(255,255,255,0.5);font-size:10px;}
+.sb-sect{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,0.3);padding:16px 18px 5px;}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;margin:1px 8px;
+  border-radius:8px;cursor:pointer;
+  color:rgba(255,255,255,0.6);font-size:13px;font-weight:500;
+  transition:background 0.15s,color 0.15s;user-select:none;position:relative;
+}
+.sb-item:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.9);}
+.sb-item.active{background:rgba(255,255,255,0.14);color:#fff;font-weight:600;}
+.sb-item.active::before{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:18px;background:#7fff9a;border-radius:2px;}
+.sb-emoji{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;}
+.sb-bottom{margin-top:auto;padding:14px 18px;border-top:1px solid rgba(255,255,255,0.1);}
+.sb-user{display:flex;align-items:center;gap:9px;}
+.sb-av{width:32px;height:32px;border-radius:50%;background:rgba(127,255,154,0.2);border:1.5px solid rgba(127,255,154,0.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#7fff9a;flex-shrink:0;}
+.sb-ui p{font-size:12px;font-weight:600;color:#fff;line-height:1.3;}
+.sb-ui span{font-size:10px;color:rgba(255,255,255,0.45);}
+.sb-logout{margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;padding:4px;}
+.sb-logout:hover{color:rgba(255,255,255,0.8);}
+
+/* ═══════════════════════════════
+   MAIN WRAP
+═══════════════════════════════ */
+.main-wrap{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+
+/* ═══════════════════════════════
+   TOPBAR
+═══════════════════════════════ */
+.topbar{
+  height:var(--th);background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 28px;
+  position:sticky;top:0;z-index:50;box-shadow:var(--shadow);
+}
+.tb-left{display:flex;align-items:center;gap:10px;}
+.tb-left h1{font-size:16px;font-weight:700;color:var(--text);}
+.tb-right{display:flex;align-items:center;gap:10px;}
+.live-pill{display:flex;align-items:center;gap:6px;background:var(--gl);border:1px solid rgba(0,102,51,0.2);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;color:var(--g);}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--g);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.tb-clock{font-size:12px;color:var(--t2);font-variant-numeric:tabular-nums;}
+.tb-icon-btn{width:34px;height:34px;border-radius:8px;background:var(--gp);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:15px;}
+.tb-icon-btn:hover{background:var(--gl);}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid #fff;}
+
+/* ═══════════════════════════════
+   PAGES
+═══════════════════════════════ */
+.page{display:none;padding:26px 28px 48px;}
+.page.active{display:block;}
+
+/* ═══════════════════════════════
+   BANNER
+═══════════════════════════════ */
+.banner{
+  background:linear-gradient(120deg,var(--gd) 0%,var(--g) 100%);
+  border-radius:var(--rl);padding:22px 26px;margin-bottom:24px;
+  display:flex;align-items:center;justify-content:space-between;overflow:hidden;position:relative;
+}
+.banner::after{content:'';position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.04);}
+.banner h2{color:#fff;font-size:18px;font-weight:700;}
+.banner p{color:rgba(255,255,255,0.6);font-size:12px;margin-top:3px;}
+.banner-stats{display:flex;gap:20px;z-index:1;}
+.bst{text-align:center;}
+.bst-v{font-size:20px;font-weight:700;color:#fff;}
+.bst-l{font-size:10px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.4px;margin-top:2px;}
+.bst-div{width:1px;background:rgba(255,255,255,0.15);}
+
+/* ═══════════════════════════════
+   KPI GRID
+═══════════════════════════════ */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.kpi{background:#fff;border-radius:var(--rl);border:1px solid var(--border);box-shadow:var(--shadow);padding:18px 20px 16px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kc,var(--g));border-radius:var(--rl) var(--rl) 0 0;}
+.kpi-ico{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:18px;}
+.kpi-lbl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+.kpi-val{font-size:26px;font-weight:700;color:var(--text);line-height:1;}
+.kpi-sub{font-size:11px;color:var(--t3);margin-top:5px;}
+.up{color:var(--g);font-weight:600;}
+.dn{color:var(--red);font-weight:600;}
+
+/* ═══════════════════════════════
+   GRID HELPERS
+═══════════════════════════════ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;}
+.g65{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;margin-bottom:20px;}
+
+/* ═══════════════════════════════
+   CARD
+═══════════════════════════════ */
+.card{background:#fff;border-radius:var(--rl);border:1px solid var(--border);box-shadow:var(--shadow);padding:20px 22px;}
+.card-hd{font-size:13px;font-weight:700;color:var(--gd);margin-bottom:16px;display:flex;align-items:center;gap:8px;justify-content:space-between;}
+.card-hd-left{display:flex;align-items:center;gap:8px;}
+.card-hd-left span{font-size:16px;}
+
+/* ═══════════════════════════════
+   BADGE
+═══════════════════════════════ */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.b-ok{background:var(--gl);color:var(--g);}
+.b-warn{background:var(--amberl);color:var(--amber);}
+.b-alert{background:var(--redl);color:var(--red);}
+.b-blue{background:var(--bluel);color:var(--blue);}
+.b-off{background:#f0f2f5;color:#888;}
+.bdot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+
+/* ═══════════════════════════════
+   TABLE
+═══════════════════════════════ */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+.tbl th{text-align:left;padding:8px 12px;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;border-bottom:1.5px solid var(--border);background:#fafbf9;}
+.tbl td{padding:10px 12px;border-bottom:1px solid #f0f4f1;vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#f7fbf8;}
+.tbl-actions{display:flex;gap:6px;}
+.tbl-btn{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:inherit;}
+.btn-on{background:var(--gl);color:var(--g);}
+.btn-off{background:#f0f2f5;color:#666;}
+.btn-eco{background:var(--amberl);color:var(--amber);}
+.btn-primary{background:var(--g);color:#fff;padding:7px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;font-weight:600;font-family:inherit;}
+.btn-primary:hover{background:var(--gd);}
+.btn-outline{background:#fff;color:var(--g);border:1.5px solid var(--g);padding:7px 16px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;font-family:inherit;}
+.btn-outline:hover{background:var(--gl);}
+.btn-danger{background:var(--redl);color:var(--red);padding:7px 14px;border-radius:8px;font-size:12px;border:none;cursor:pointer;font-weight:600;font-family:inherit;}
+.temp-c{display:inline-block;padding:3px 8px;border-radius:6px;font-weight:600;font-size:12px;}
+.tc-ok{background:var(--gl);color:var(--g);}
+.tc-warn{background:var(--amberl);color:var(--amber);}
+.tc-hot{background:var(--redl);color:var(--red);}
+.occ-wrap{display:flex;align-items:center;gap:6px;}
+.occ-bar{width:48px;height:5px;background:#e0e8e2;border-radius:3px;overflow:hidden;}
+.occ-fill{height:100%;border-radius:3px;}
+
+/* ═══════════════════════════════
+   ALERTS
+═══════════════════════════════ */
+.al-item{display:flex;align-items:flex-start;gap:11px;padding:12px 0;border-bottom:1px solid #f0f4f1;}
+.al-item:last-child{border-bottom:none;}
+.al-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.al-ico.danger{background:var(--redl);}
+.al-ico.warn{background:var(--amberl);}
+.al-ico.info{background:var(--bluel);}
+.al-ico.ok{background:var(--gl);}
+.al-text p{font-size:12.5px;font-weight:600;color:var(--text);line-height:1.4;}
+.al-text span{font-size:11px;color:var(--t3);}
+.al-time{margin-left:auto;font-size:10px;color:var(--t3);white-space:nowrap;padding-top:2px;}
+
+/* ═══════════════════════════════
+   SENSOR BOXES
+═══════════════════════════════ */
+.sbox-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sbox{background:var(--gp);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.sbox-lbl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+.sbox-val{font-size:22px;font-weight:700;color:var(--gd);}
+.sbox-unit{font-size:11px;color:var(--t3);}
+.sbox-range{font-size:10px;color:var(--t3);margin-top:3px;}
+
+/* ═══════════════════════════════
+   SAV BARS
+═══════════════════════════════ */
+.sav-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f4f1;}
+.sav-row:last-child{border-bottom:none;}
+.sav-lbl{font-size:12px;color:var(--t2);min-width:120px;}
+.sav-outer{flex:1;height:6px;background:#e0e8e2;border-radius:3px;overflow:hidden;}
+.sav-inner{height:100%;border-radius:3px;background:var(--g);}
+.sav-pct{font-size:12px;font-weight:700;color:var(--gd);min-width:34px;text-align:right;}
+
+/* ═══════════════════════════════
+   TIMELINE
+═══════════════════════════════ */
+.tl-item{display:flex;gap:12px;padding:10px 0;}
+.tl-l{display:flex;flex-direction:column;align-items:center;}
+.tl-c{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.tl-done{background:var(--g);color:#fff;}
+.tl-active{background:#f5c518;color:#333;box-shadow:0 0 0 4px rgba(245,197,24,0.25);}
+.tl-up{background:#e8ede9;color:#aaa;border:1.5px solid #ccc;}
+.tl-ln{width:2px;flex:1;background:var(--border);margin-top:3px;}
+.tl-r{padding-top:3px;}
+.tl-r h4{font-size:12.5px;font-weight:700;color:var(--text);}
+.tl-r p{font-size:11px;color:var(--t3);margin-top:2px;line-height:1.5;}
+.tl-r .wk{font-size:10px;color:var(--g);font-weight:700;margin-top:3px;text-transform:uppercase;letter-spacing:0.4px;}
+.tl-item:last-child .tl-ln{display:none;}
+
+/* ═══════════════════════════════
+   CHART
+═══════════════════════════════ */
+.chart-wrap{position:relative;height:210px;}
+
+/* ═══════════════════════════════
+   CAMPUS CARDS
+═══════════════════════════════ */
+.campus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+.cc{
+  background:#fff;border-radius:var(--rl);border:1px solid var(--border);
+  padding:16px 18px;cursor:pointer;transition:box-shadow 0.2s,transform 0.15s;
+  position:relative;overflow:hidden;
+}
+.cc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--g);transform:scaleX(0);transition:transform 0.2s;transform-origin:left;}
+.cc:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.cc:hover::after{transform:scaleX(1);}
+.cc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.cc-name{font-size:13px;font-weight:700;color:var(--text);}
+.cc-city{font-size:11px;color:var(--t3);margin-top:1px;}
+.cc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;}
+.cc-stat{text-align:center;}
+.cc-stat .v{font-size:15px;font-weight:700;color:var(--gd);}
+.cc-stat .l{font-size:10px;color:var(--t3);}
+.cc-barwrap{margin-top:4px;}
+.cc-barlbl{display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-bottom:3px;}
+.cc-bar{height:4px;background:#e0e8e2;border-radius:3px;overflow:hidden;}
+.cc-fill{height:100%;border-radius:3px;}
+
+/* ═══════════════════════════════
+   FIRE ALERT BANNER
+═══════════════════════════════ */
+.fire-banner{
+  background:var(--redl);border:1.5px solid var(--red);border-radius:var(--r);
+  padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;
+}
+.fire-banner p{font-size:13px;font-weight:600;color:var(--red);}
+.fire-banner span{font-size:12px;color:#c0392b;margin-top:2px;display:block;}
+
+/* ═══════════════════════════════
+   SETTINGS
+═══════════════════════════════ */
+.sg{background:#fff;border:1px solid var(--border);border-radius:var(--rl);margin-bottom:16px;overflow:hidden;}
+.sg-head{padding:12px 18px;background:var(--gp);border-bottom:1px solid var(--border);font-size:12.5px;font-weight:700;color:var(--gd);}
+.sg-row{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid #f0f4f1;}
+.sg-row:last-child{border-bottom:none;}
+.sg-lbl p{font-size:13px;font-weight:500;color:var(--text);}
+.sg-lbl span{font-size:11px;color:var(--t3);}
+.toggle{width:38px;height:20px;border-radius:10px;background:#ccc;position:relative;cursor:pointer;transition:background 0.2s;display:inline-block;flex-shrink:0;}
+.toggle.on{background:var(--g);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+.toggle.on::after{left:21px;}
+.sg-input{width:80px;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none;text-align:center;}
+.sg-input:focus{border-color:var(--g);}
+.sg-select{padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;outline:none;background:#fff;}
+.sg-select:focus{border-color:var(--g);}
+
+/* ═══════════════════════════════
+   MODAL
+═══════════════════════════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:var(--rl);padding:28px 30px;width:420px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+.modal h3{font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.modal p{font-size:12px;color:var(--t3);margin-bottom:20px;}
+.mf-group{margin-bottom:14px;}
+.mf-group label{font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.4px;}
+.mf-group input,.mf-group select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;}
+.mf-group input:focus,.mf-group select:focus{border-color:var(--g);}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+/* ═══════════════════════════════
+   NOTIF PANEL
+═══════════════════════════════ */
+.notif-panel{
+  position:fixed;top:68px;right:18px;width:320px;
+  background:#fff;border-radius:var(--rl);border:1px solid var(--border);
+  box-shadow:var(--shadow-md);z-index:200;display:none;
+}
+.notif-panel.show{display:block;}
+.notif-head{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.notif-head h4{font-size:13px;font-weight:700;color:var(--text);}
+.notif-head button{background:none;border:none;font-size:11px;color:var(--g);cursor:pointer;font-weight:600;}
+.notif-item{padding:11px 16px;border-bottom:1px solid #f0f4f1;display:flex;gap:10px;align-items:flex-start;}
+.notif-item:last-child{border-bottom:none;}
+.ni-ico{font-size:16px;flex-shrink:0;}
+.ni-text p{font-size:12px;font-weight:600;color:var(--text);}
+.ni-text span{font-size:11px;color:var(--t3);}
+
+/* ═══════════════════════════════
+   REPORTS
+═══════════════════════════════ */
+.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+.rcard{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:20px;text-align:center;}
+.rcard-ico{font-size:28px;margin-bottom:10px;}
+.rcard h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.rcard p{font-size:11px;color:var(--t3);margin-bottom:14px;}
+.rcard-btns{display:flex;gap:8px;justify-content:center;}
+.rbtn{padding:5px 14px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--g);color:var(--g);background:#fff;font-family:inherit;transition:background 0.15s;}
+.rbtn:hover{background:var(--gl);}
+
+/* ═══════════════════════════════
+   FOOTER
+═══════════════════════════════ */
+.footer{background:#fff;border-top:1px solid var(--border);padding:12px 28px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--t3);}
+.footer a{color:var(--g);text-decoration:none;font-weight:500;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" fill="#fff"/><text x="20" y="26" text-anchor="middle" fill="#006633" font-size="11" font-weight="800" font-family="sans-serif">FAST</text></svg>
+    </div>
+    <h2>FAST-NUCES AIRPro</h2>
+    <p>Smart Campus Management System</p>
+    <div class="login-pills">
+      <span class="lp">🏫 6 Campuses</span>
+      <span class="lp">❄️ AC Management</span>
+      <span class="lp">🔥 Fire Safety</span>
+      <span class="lp">⚡ Energy</span>
+    </div>
+    <div class="login-err" id="loginErr">🔒 Invalid credentials. Try admin / 123456</div>
+    <div class="lf-group"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username" autocomplete="username"/></div>
+    <div class="lf-group"><label>Password</label><input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password"/></div>
+    <button class="login-btn" onclick="doLogin()">Sign In to Dashboard</button>
+    <div class="login-hint">Username: <strong>admin</strong> &nbsp;|&nbsp; Password: <strong>123456</strong></div>
+    <div class="login-footer">FAST National University · AIRPro v3.0<br>Smart Campus Management System · Pakistan</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     NOTIFICATION PANEL
+═══════════════════════════════ -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-head"><h4>Notifications</h4><button onclick="document.getElementById('notifPanel').classList.remove('show')">Mark all read ✕</button></div>
+  <div class="notif-item"><span class="ni-ico">🔴</span><div class="ni-text"><p>Server Room Temp Critical</p><span>Data Centre B · 31.4°C · 3 min ago</span></div></div>
+  <div class="notif-item"><span class="ni-ico">🟡</span><div class="ni-text"><p>High Humidity — Physics Lab</p><span>Block A · 79% RH · 12 min ago</span></div></div>
+  <div class="notif-item"><span class="ni-ico">🟠</span><div class="ni-text"><p>AC Fault — Lecture Hall 3</p><span>Compressor F12 · 25 min ago</span></div></div>
+  <div class="notif-item"><span class="ni-ico">🔵</span><div class="ni-text"><p>Eco-mode: 11 rooms auto-switched</p><span>Occupancy trigger · 38 min ago</span></div></div>
+</div>
+
+<!-- ═══════════════════════════════
+     AC CONTROL MODAL
+═══════════════════════════════ -->
+<div class="modal-overlay" id="acModal">
+  <div class="modal">
+    <h3>❄️ AC Unit Control</h3>
+    <p>Adjust settings for the selected AC unit</p>
+    <div class="mf-group"><label>Set Temperature (°C)</label><input type="number" id="acTemp" value="24" min="16" max="30"/></div>
+    <div class="mf-group"><label>Mode</label><select id="acMode"><option>Cooling</option><option>Eco</option><option>Fan Only</option><option>Off</option></select></div>
+    <div class="mf-group"><label>Fan Speed</label><select><option>Auto</option><option>Low</option><option>Medium</option><option>High</option></select></div>
+    <div class="modal-btns">
+      <button class="btn-outline" onclick="closeModal('acModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveAC()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD USER MODAL -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal">
+    <h3>👤 Add User</h3>
+    <p>Invite a new user to AIRPro system</p>
+    <div class="mf-group"><label>Full Name</label><input type="text" placeholder="e.g. Hassan Raza"/></div>
+    <div class="mf-group"><label>Email</label><input type="email" placeholder="user@fast.edu.pk"/></div>
+    <div class="mf-group"><label>Role</label><select><option>Campus Admin</option><option>Technician</option><option>Viewer</option></select></div>
+    <div class="mf-group"><label>Campus</label><select><option>All Campuses</option><option>Islamabad</option><option>Lahore</option><option>Karachi</option><option>Peshawar</option><option>Chiniot-Faisalabad</option></select></div>
+    <div class="modal-btns">
+      <button class="btn-outline" onclick="closeModal('userModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveUser()">Save User</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     APP SHELL
+═══════════════════════════════ -->
+<div id="appShell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo-wrap">
+        <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" fill="#006633"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="10" font-weight="800" font-family="sans-serif">FAST</text></svg>
+      </div>
+      <div class="sb-brand-text"><h2>AIRPro</h2><span>FAST-NUCES · 6 Campuses</span></div>
+    </div>
+
+    <div class="sb-sect">Overview</div>
+    <div class="sb-item active" onclick="nav('dashboard',this)"><span class="sb-emoji">🏠</span>Dashboard</div>
+    <div class="sb-item" onclick="nav('campuses',this)"><span class="sb-emoji">🏫</span>All Campuses</div>
+
+    <div class="sb-sect">Systems</div>
+    <div class="sb-item" onclick="nav('ac',this)"><span class="sb-emoji">❄️</span>AC Management</div>
+    <div class="sb-item" onclick="nav('environment',this)"><span class="sb-emoji">🌡️</span>Environment</div>
+    <div class="sb-item" onclick="nav('fire',this)"><span class="sb-emoji">🔥</span>Fire &amp; Safety<span class="sb-badge">1</span></div>
+
+    <div class="sb-sect">Analytics</div>
+    <div class="sb-item" onclick="nav('energy',this)"><span class="sb-emoji">⚡</span>Energy</div>
+    <div class="sb-item" onclick="nav('alerts',this)"><span class="sb-emoji">🔔</span>Alerts<span class="sb-badge">4</span></div>
+    <div class="sb-item" onclick="nav('reports',this)"><span class="sb-emoji">📊</span>Reports</div>
+
+    <div class="sb-sect">Admin</div>
+    <div class="sb-item" onclick="nav('users',this)"><span class="sb-emoji">👥</span>Users &amp; Roles</div>
+    <div class="sb-item" onclick="nav('settings',this)"><span class="sb-emoji">⚙️</span>Settings</div>
+
+    <div class="sb-bottom">
+      <div class="sb-user">
+        <div class="sb-av">AD</div>
+        <div class="sb-ui"><p>Admin</p><span>FAST-NUCES · Pakistan</span></div>
+        <button class="sb-logout" onclick="doLogout()" title="Logout">⏻</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN WRAP -->
+  <div class="main-wrap">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="tb-left">
+        <h1 id="pageTitle">Dashboard Overview</h1>
+      </div>
+      <div class="tb-right">
+        <div class="live-pill"><span class="ldot"></span>Live</div>
+        <span class="tb-clock" id="clk">--:--</span>
+        <div class="tb-icon-btn" onclick="toggleNotif()" title="Notifications">🔔<span class="notif-dot"></span></div>
+        <div class="tb-icon-btn" title="Refresh" onclick="location.reload()">🔄</div>
+        <div class="tb-icon-btn" style="background:var(--gp);font-size:12px;font-weight:700;color:var(--gd);">AD</div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════
+         PAGE: DASHBOARD
+    ═══════════════════════════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="banner">
+        <div><h2>Welcome back 👋</h2><p>FAST-NUCES · AIRPro Smart Environment System · 6 campuses</p></div>
+        <div class="banner-stats">
+          <div class="bst"><div class="bst-v">98.2%</div><div class="bst-l">Uptime</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">347</div><div class="bst-l">AC Units Live</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">25%</div><div class="bst-l">Energy Saved</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">4</div><div class="bst-l">Alerts</div></div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi" style="--kc:#006633">
+          <div class="kpi-ico" style="background:#e6f2ec">❄️</div>
+          <div class="kpi-lbl">AC Units Active</div>
+          <div class="kpi-val">347</div>
+          <div class="kpi-sub">of 500+ total · <span class="up">76% online</span></div>
+        </div>
+        <div class="kpi" style="--kc:#1a5db5">
+          <div class="kpi-ico" style="background:#e8f0fe">🌡️</div>
+          <div class="kpi-lbl">Avg Temperature</div>
+          <div class="kpi-val">23.4°C</div>
+          <div class="kpi-sub">All zones · <span class="up">↓ 1.2° vs yesterday</span></div>
+        </div>
+        <div class="kpi" style="--kc:#c8a84b">
+          <div class="kpi-ico" style="background:#fdf6e3">⚡</div>
+          <div class="kpi-lbl">Energy Saved</div>
+          <div class="kpi-val">25%</div>
+          <div class="kpi-sub">≈ PKR 27M+/yr · <span class="up">On target</span></div>
+        </div>
+        <div class="kpi" style="--kc:#c0392b">
+          <div class="kpi-ico" style="background:#fdecea">🔔</div>
+          <div class="kpi-lbl">Active Alerts</div>
+          <div class="kpi-val">4</div>
+          <div class="kpi-sub">3 warnings · <span class="dn">1 critical</span></div>
+        </div>
+      </div>
+
+      <!-- Energy Chart + Alerts -->
+      <div class="g65">
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-hd-left"><span>⚡</span>Energy — All Campuses (kWh Today)</div>
+            <button class="btn-outline" style="font-size:11px;padding:4px 10px;" onclick="exportCSV('ac')">📥 Export CSV</button>
+          </div>
+          <div class="chart-wrap"><canvas id="energyChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-hd-left"><span>🔔</span>Live Alerts</div></div>
+          <div class="al-item"><div class="al-ico danger">🔴</div><div class="al-text"><p>Server Room Temp Critical</p><span>Data Centre B · 31.4°C · 3 min ago</span></div></div>
+          <div class="al-item"><div class="al-ico warn">🟡</div><div class="al-text"><p>High Humidity — Physics Lab</p><span>Block A2 · 79% RH · 12 min ago</span></div></div>
+          <div class="al-item"><div class="al-ico warn">🟠</div><div class="al-text"><p>AC Unit Fault — LH-3</p><span>Compressor error F12 · 25 min ago</span></div></div>
+          <div class="al-item"><div class="al-ico info">🔵</div><div class="al-text"><p>Eco-mode — 11 rooms</p><span>Auto-switch on vacancy · 38 min ago</span></div></div>
+        </div>
+      </div>
+
+      <!-- Avg Temp Chart -->
+      <div class="g2">
+        <div class="card">
+          <div class="card-hd"><div class="card-hd-left"><span>🌡️</span>Avg Temperature — All Campuses (°C)</div></div>
+          <div class="chart-wrap"><canvas id="tempChartMain"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-hd-left"><span>📊</span>AC Status Distribution</div></div>
+          <div style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;">
+            <span style="font-size:11px;color:var(--t3);display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#006633;display:inline-block"></span>Active (347)</span>
+            <span style="font-size:11px;color:var(--t3);display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#c8a84b;display:inline-block"></span>Eco (89)</span>
+            <span style="font-size:11px;color:var(--t3);display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#dde8e2;display:inline-block"></span>Off (64)</span>
+          </div>
+          <div class="chart-wrap"><canvas id="acDonut"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Implementation Timeline -->
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-left"><span>✅</span>Implementation Roadmap</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+          <div>
+            <div class="tl-item"><div class="tl-l"><div class="tl-c tl-done">✓</div><div class="tl-ln"></div></div><div class="tl-r"><h4>Phase 1 — Pilot</h4><p>1 campus deployed, baseline data collected.</p><div class="wk">Weeks 1–4 · Done</div></div></div>
+            <div class="tl-item"><div class="tl-l"><div class="tl-c tl-done">✓</div><div class="tl-ln"></div></div><div class="tl-r"><h4>Phase 2 — Evaluation</h4><p>Energy savings report & staff training.</p><div class="wk">Weeks 5–6 · Done</div></div></div>
+          </div>
+          <div>
+            <div class="tl-item"><div class="tl-l"><div class="tl-c tl-active">▶</div><div class="tl-ln"></div></div><div class="tl-r"><h4>Phase 3 — Rollout</h4><p>Expanding to all 5 remaining campuses.</p><div class="wk">Weeks 7–20 · In Progress</div></div></div>
+            <div class="tl-item"><div class="tl-l"><div class="tl-c tl-up">4</div><div class="tl-ln"></div></div><div class="tl-r"><h4>Phase 4 — AI Optimization</h4><p>Predictive analytics & continuous tuning.</p><div class="wk">Ongoing · Upcoming</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════
+         PAGE: ALL CAMPUSES
+    ═══════════════════════════════ -->
+    <div class="page" id="page-campuses">
+      <div class="banner">
+        <div><h2>🏫 All Campuses — FAST-NUCES Pakistan</h2><p>Click any campus card to view room &amp; AC details</p></div>
+        <div class="banner-stats">
+          <div class="bst"><div class="bst-v">6</div><div class="bst-l">Campuses</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">500+</div><div class="bst-l">AC Units</div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:18px;align-items:center;">
+        <button class="btn-outline" onclick="exportCSV('ac')">📥 Export</button>
+        <select class="sg-select" onchange="filterCampuses(this.value)">
+          <option value="all">All Status</option>
+          <option value="normal">Normal</option>
+          <option value="warning">Warning</option>
+          <option value="critical">Critical</option>
+        </select>
+      </div>
+      <div class="campus-grid" id="campusGrid"></div>
+
+      <!-- Campus Detail (hidden by default) -->
+      <div id="campusDetail" style="display:none;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+          <button class="btn-outline" style="font-size:12px;padding:6px 14px;" onclick="hideCampusDetail()">← Back to Campuses</button>
+          <span style="color:var(--t3);font-size:13px;" id="campusBreadcrumb">🏠 Dashboard › Campus</span>
+        </div>
+        <div class="g3" style="margin-bottom:16px;">
+          <div class="card" style="text-align:center;padding:20px;">
+            <div style="font-size:24px;font-weight:700;color:var(--gd)" id="cd-ac">--</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:4px;">AC Units Online</div>
+          </div>
+          <div class="card" style="text-align:center;padding:20px;">
+            <div style="font-size:24px;font-weight:700;color:var(--gd)" id="cd-temp">--</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:4px;">Avg Temperature</div>
+          </div>
+          <div class="card" style="text-align:center;padding:20px;">
+            <div style="font-size:24px;font-weight:700;color:var(--gd)" id="cd-hum">--</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:4px;">Avg Humidity</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+          <button class="btn-primary" onclick="showTab('classrooms')" id="tab-classrooms">🚪 Classrooms</button>
+          <button class="btn-outline" onclick="showTab('labs')" id="tab-labs">🔬 Labs</button>
+          <button class="btn-outline" onclick="showTab('halls')" id="tab-halls">🏛️ Halls &amp; Common</button>
+          <select class="sg-select" id="floorFilter" onchange="applyRoomFilters()"><option value="all">All Floors</option><option value="Ground">Ground Floor</option><option value="Floor 1">Floor 1</option><option value="Floor 2">Floor 2</option><option value="Floor 3">Floor 3</option></select>
+          <select class="sg-select" id="acStatusFilter" onchange="applyRoomFilters()"><option value="all">All AC Status</option><option value="ON">ON</option><option value="ECO">ECO</option><option value="OFF">OFF</option><option value="FAULT">FAULT</option></select>
+        </div>
+        <div class="card" id="tab-classrooms-content">
+          <div class="card-hd"><div class="card-hd-left"><span>🚪</span>Classrooms — AC Unit Status</div><span id="room-count" style="font-size:12px;color:var(--t3)"></span></div>
+          <table class="tbl" id="classroomTable">
+            <thead><tr><th>Room ID</th><th>Room Name</th><th>Block</th><th>Floor</th><th>AC Unit</th><th>Status</th><th>Mode</th><th>Set °C</th><th>Room °C</th><th>Energy</th><th>Control</th></tr></thead>
+            <tbody id="classroomBody"></tbody>
+          </table>
+        </div>
+        <div class="card" id="tab-labs-content" style="display:none;">
+          <div class="card-hd"><div class="card-hd-left"><span>🔬</span>Labs — AC Unit Status</div></div>
+          <table class="tbl"><thead><tr><th>Lab ID</th><th>Lab Name</th><th>Block</th><th>Floor</th><th>AC Unit</th><th>Status</th><th>Mode</th><th>Room °C</th><th>Control</th></tr></thead>
+          <tbody id="labBody"></tbody></table>
+        </div>
+        <div class="card" id="tab-halls-content" style="display:none;">
+          <div class="card-hd"><div class="card-hd-left"><span>🏛️</span>Halls &amp; Common Areas</div></div>
+          <table class="tbl"><thead><tr><th>Hall ID</th><th>Name</th><th>Block</th><th>Floor</th><th>AC Unit</th><th>Status</th><th>Room °C</th><th>Energy</th></tr></thead>
+          <tbody id="hallBody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════
+         PAGE: AC MANAGEMENT
+    ═══════════════════════════════ -->
+    <div class="page" id="page-ac">
+      <div class="banner">
+        <div><h2>❄️ AC Management — AIRPro</h2><p>All units across FAST-NUCES campuses</p></div>
+        <div class="banner-stats">
+          <div class="bst"><div class="bst-v">347</div><div class="bst-l">Online</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">89</div><div class="bst-l">Eco Mode</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">64</div><div class="bst-l">Offline</div></div>
+        </div>
+      </div>
+      <div style="background:var(--gl);border:1.5px solid rgba(0,102,51,0.3);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:16px;">🤖</span>
+        <div style="flex:1;"><p style="font-size:13px;font-weight:600;color:var(--gd);">AIRPro AI: 89 units across 6 campuses can switch to Eco-mode — est. 14% energy saving</p><span style="font-size:11px;color:var(--t3);">Based on current occupancy and outdoor temperature readings</span></div>
+        <button class="btn-primary" onclick="applyEco()">Apply Eco</button>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+        <button class="btn-outline" onclick="exportCSV('ac')">📥 Export CSV</button>
+        <button class="btn-outline" onclick="exportPDF('ac')">📄 Export PDF</button>
+        <select class="sg-select" onchange="filterAC('campus',this.value)">
+          <option value="all">All Campuses</option>
+          <option value="Islamabad">Islamabad</option>
+          <option value="Lahore">Lahore</option>
+          <option value="Karachi">Karachi</option>
+          <option value="Peshawar">Peshawar</option>
+          <option value="Chiniot-Faisalabad">Chiniot-Faisalabad</option>
+        </select>
+        <select class="sg-select" onchange="filterAC('status',this.value)">
+          <option value="all">All Status</option>
+          <option value="ON">ON</option>
+          <option value="OFF">OFF</option>
+          <option value="FAULT">FAULT</option>
+        </select>
+        <span style="font-size:13px;color:var(--t2);margin-left:4px;font-weight:600;" id="acCount">500 units</span>
+      </div>
+      <div class="card">
+        <table class="tbl" id="acTable">
+          <thead><tr><th>AC ID</th><th>Campus</th><th>Block</th><th>Room</th><th>Floor</th><th>Status</th><th>Mode</th><th>Set °C</th><th>Room °C</th><th>kWh</th><th>Action</th></tr></thead>
+          <tbody id="acBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════
+         PAGE: ENVIRONMENT
+    ═══════════════════════════════ -->
+    <div class="page" id="page-environment">
+      <div class="banner">
+        <div><h2>🌡️ Environment — IRIS Ultra</h2><p>Live sensor readings — All FAST-NUCES campuses</p></div>
+        <div class="banner-stats">
+          <div class="bst"><div class="bst-v">23.6°C</div><div class="bst-l">Avg Temp</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">59%</div><div class="bst-l">Avg Humidity</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">48 AQI</div><div class="bst-l">Air Quality</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">412 ppm</div><div class="bst-l">CO₂ Avg</div></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-hd"><div class="card-hd-left"><span>🌡️</span>Temperature Trend — 24h</div></div>
+          <div class="chart-wrap"><canvas id="tempChart24"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-hd-left"><span>💧</span>Humidity Trend — 24h</div></div>
+          <div class="chart-wrap"><canvas id="humChart24"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-left"><span>📍</span>Zone Readings — All Campuses</div>
+          <span style="font-size:11px;color:var(--t3);">● Live</span>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Zone</th><th>Campus</th><th>City</th><th>Temp</th><th>Humidity</th><th>AQI</th><th>CO₂</th><th>Occupancy</th><th>Status</th></tr></thead>
+          <tbody id="envBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════
+         PAGE: FIRE & SAFETY
+    ═══════════════════════════════ -->
+    <div class="page" id="page-fire">
+      <div class="banner" style="background:linear-gradient(120deg,#6b1a1a,#c0392b)">
+        <div><h2>🔥 Fire &amp; Safety — FireSense</h2><p>Real-time fire, smoke &amp; CO₂ detection with instant alerts</p></div>
+        <div class="banner-stats">
+          <div class="bst"><div class="bst-v">48</div><div class="bst-l">Sensors Active</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">1</div><div class="bst-l">Triggered</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">2</div><div class="bst-l">Warnings</div></div>
+        </div>
+      </div>
+      <div class="fire-banner">
+        <span style="font-size:22px;">🚨</span>
+        <div>
+          <p>ACTIVE — FAST Karachi, Science Block · Floor 2 · Room SF-201 | CO Alert — FAST Lahore, Chem Lab</p>
+          <span>Smoke sensor triggered 11:47. Partial evacuation in progress. Security team dispatched.</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-left:auto;flex-shrink:0;">
+          <button class="btn-danger" onclick="alert('Emergency broadcast sent to all staff!')">📢 Broadcast</button>
+          <button class="btn-outline" style="border-color:var(--red);color:var(--red);" onclick="resolveAlert()">✅ Resolve</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <button class="btn-outline" onclick="exportPDF('fire')">📄 Export PDF</button>
+        <button class="btn-danger" onclick="triggerDrill()">🚨 Trigger Drill</button>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-hd"><div class="card-hd-left"><span>🔍</span>Sensor Status — All Campuses</div><span style="font-size:11px;color:var(--red);font-weight:600;">1 Triggered</span></div>
+        <table class="tbl" id="fireTable">
+          <thead><tr><th>Sensor ID</th><th>Type</th><th>Campus</th><th>City</th><th>Location</th><th>Reading</th><th>Status</th></tr></thead>
+          <tbody id="fireBody"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-left"><span>⏱️</span>Response Timeline</div></div>
+        <div style="padding:4px 0;">
+          <div class="tl-item"><div class="tl-l"><div class="tl-c" style="background:#c0392b;color:#fff;font-size:10px;">🔴</div><div class="tl-ln"></div></div><div class="tl-r"><h4>Smoke sensor SM-F201 triggered</h4><p>SF-201 · Science Block Floor 2</p><div class="wk">11:47:03</div></div></div>
+          <div class="tl-item"><div class="tl-l"><div class="tl-c" style="background:#c47d0a;color:#fff;font-size:10px;">🟡</div><div class="tl-ln"></div></div><div class="tl-r"><h4>Admin alert sent via SMS &amp; email</h4><p>Automated notification</p><div class="wk">11:47:06</div></div></div>
+          <div class="tl-item"><div class="tl-l"><div class="tl-c" style="background:#1a5db5;color:#fff;font-size:10px;">🔵</div><div class="tl-ln"></div></div><div class="tl-r"><h4>PA system activated — partial evacuation</h4><p>Floors 1 &amp; 2 clearing</p><div class="wk">11:47:30</div></div></div>
+          <div class="tl-item"><div class="tl-l"><div class="tl-c" style="background:#aaa;color:#fff;font-size:10px;">⚪</div><div class="tl-ln"></div></div><div class="tl-r"><h4>Awaiting fire dept. response</h4><p>ETA 8 min</p><div class="wk">11:48:00</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════
+         PAGE: ENERGY
+    ═══════════════════════════════ -->
+    <div class="page" id="page-energy">
+      <div class="banner" style="background:linear-gradient(120deg,#1a4d1a,#006633)">
+        <div><h2>⚡ Energy Analytics</h2><p>All FAST-NUCES campuses — real-time consumption</p></div>
+        <div class="banner-stats">
+          <div class="bst"><div class="bst-v" id="kwh-today">--</div><div class="bst-l">kWh Today</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">288</div><div class="bst-l">kWh This Week</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">1,140</div><div class="bst-l">kWh This Month</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">5.4t</div><div class="bst-l">CO₂ Saved MTD</div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <button class="btn-outline" onclick="exportCSV('energy')">📥 CSV</button>
+        <button class="btn-outline" onclick="exportPDF('energy')">📄 PDF</button>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-hd"><div class="card-hd-left"><span>⚡</span>Campus-wise Energy Consumption</div></div>
+          <div class="chart-wrap"><canvas id="energyCampus"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-hd-left"><span>📈</span>Weekly Trend (kWh) — AIRPro vs Baseline</div></div>
+          <div class="chart-wrap"><canvas id="energyWeekly"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-hd-left"><span>📊</span>Savings Breakdown</div></div>
+        <div class="sav-row"><span class="sav-lbl">Electricity Costs</span><div class="sav-outer"><div class="sav-inner" style="width:75%"></div></div><span class="sav-pct">25%</span></div>
+        <div class="sav-row"><span class="sav-lbl">Unoccupied Spaces</span><div class="sav-outer"><div class="sav-inner" style="width:65%"></div></div><span class="sav-pct">22%</span></div>
+        <div class="sav-row"><span class="sav-lbl">Maintenance</span><div class="sav-outer"><div class="sav-inner" style="width:55%"></div></div><span class="sav-pct">30%</span></div>
+        <div class="sav-row"><span class="sav-lbl">Peak Load</span><div class="sav-outer"><div class="sav-inner" style="width:45%"></div></div><span class="sav-pct">18%</span></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════
+         PAGE: ALERTS
+    ═══════════════════════════════ -->
+    <div class="page" id="page-alerts">
+      <div class="banner" style="background:linear-gradient(120deg,#5a1a00,#c0392b)">
+        <div><h2>🔔 Alerts &amp; Notifications</h2><p>5 active · 1 critical</p></div>
+        <div class="banner-stats">
+          <div class="bst"><div class="bst-v">1</div><div class="bst-l">Critical</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">3</div><div class="bst-l">High</div></div>
+          <div class="bst-div"></div>
+          <div class="bst"><div class="bst-v">5</div><div class="bst-l">Total</div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+        <button class="btn-outline" onclick="exportPDF('alerts')">📄 Export PDF</button>
+        <button class="btn-primary" onclick="markAllResolved()">✅ Mark All Resolved</button>
+        <select class="sg-select" onchange="filterAlerts('sev',this.value)"><option value="all">All Severity</option><option value="Critical">Critical</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select>
+        <select class="sg-select" onchange="filterAlerts('status',this.value)"><option value="all">All Status</option><option value="Open">Open</option><option value="Resolved">Resolved</option></select>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead><tr><th>ID</th><th>Alert</th><th>System</th><th>Campus</th><th>Location</th><th>Time</th><th>Severity</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="alertBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════
+         PAGE: REPORTS
+    ═══════════════════════════════ -->
+    <div class="page" id="page-reports">
+      <div class="banner"><div><h2>📊 Reports</h2><p>Generate and download campus reports</p></div></div>
+      <div class="report-grid">
+        <div class="rcard"><div class="rcard-ico">⚡</div><h3>Energy Usage</h3><p>Per campus &amp; room breakdown</p><div class="rcard-btns"><button class="rbtn" onclick="exportPDF('energy')">📄 PDF</button><button class="rbtn" onclick="exportCSV('energy')">📊 CSV</button></div></div>
+        <div class="rcard"><div class="rcard-ico">🌡️</div><h3>Temperature Logs</h3><p>Room-by-room history</p><div class="rcard-btns"><button class="rbtn" onclick="exportPDF('temp')">📄 PDF</button><button class="rbtn" onclick="exportCSV('env')">📊 CSV</button></div></div>
+        <div class="rcard"><div class="rcard-ico">🔔</div><h3>Alert History</h3><p>All alerts &amp; resolutions</p><div class="rcard-btns"><button class="rbtn" onclick="exportPDF('alerts')">📄 PDF</button><button class="rbtn" onclick="exportCSV('alerts')">📊 CSV</button></div></div>
+        <div class="rcard"><div class="rcard-ico">❄️</div><h3>AC Performance</h3><p>Unit-level performance report</p><div class="rcard-btns"><button class="rbtn" onclick="exportPDF('ac')">📄 PDF</button><button class="rbtn" onclick="exportCSV('ac')">📊 CSV</button></div></div>
+        <div class="rcard"><div class="rcard-ico">🔥</div><h3>Fire &amp; Safety</h3><p>Sensor status &amp; incident log</p><div class="rcard-btns"><button class="rbtn" onclick="exportPDF('fire')">📄 PDF</button><button class="rbtn" onclick="exportCSV('fire')">📊 CSV</button></div></div>
+        <div class="rcard"><div class="rcard-ico">📋</div><h3>Full Campus Report</h3><p>Comprehensive campus summary</p><div class="rcard-btns"><button class="rbtn" onclick="exportPDF('full')">📄 PDF</button><button class="rbtn" onclick="exportCSV('ac')">📊 CSV</button></div></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════
+         PAGE: USERS & ROLES
+    ═══════════════════════════════ -->
+    <div class="page" id="page-users">
+      <div class="banner"><div><h2>👥 Users &amp; Roles</h2><p>Manage access and permissions for AIRPro</p></div></div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-primary" onclick="openModal('userModal')">+ Invite User</button>
+        <button class="btn-outline" onclick="exportCSV('users')">📄 Export</button>
+        <select class="sg-select" onchange="filterUsers(this.value)">
+          <option value="all">All Roles</option><option value="Super Admin">Super Admin</option><option value="Campus Admin">Campus Admin</option><option value="Technician">Technician</option><option value="Viewer">Viewer</option>
+        </select>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Campus</th><th>Status</th><th>Last Active</th><th>Actions</th></tr></thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════
+         PAGE: SETTINGS
+    ═══════════════════════════════ -->
+    <div class="page" id="page-settings">
+      <div class="banner"><div><h2>⚙️ Settings</h2><p>Configure thresholds, notifications and automation</p></div></div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+        <button class="btn-primary" onclick="alert('Settings saved successfully!')">💾 Save All Settings</button>
+      </div>
+      <div class="sg">
+        <div class="sg-head">Alert Thresholds</div>
+        <div class="sg-row"><div class="sg-lbl"><p>Max Temperature</p><span>Alert above this value</span></div><div style="display:flex;align-items:center;gap:6px;"><input class="sg-input" type="number" value="28"/>°C</div></div>
+        <div class="sg-row"><div class="sg-lbl"><p>CO₂ Threshold</p><span>Alert above this value</span></div><div style="display:flex;align-items:center;gap:6px;"><input class="sg-input" type="number" value="1000"/>ppm</div></div>
+        <div class="sg-row"><div class="sg-lbl"><p>Humidity Threshold</p><span>Alert above this value</span></div><div style="display:flex;align-items:center;gap:6px;"><input class="sg-input" type="number" value="70"/>%</div></div>
+      </div>
+      <div class="sg">
+        <div class="sg-head">Notifications</div>
+        <div class="sg-row"><div class="sg-lbl"><p>Email Alerts</p><span>Send via admin email</span></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="sg-row"><div class="sg-lbl"><p>SMS Critical Alerts</p><span>For critical events only</span></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="sg-row"><div class="sg-lbl"><p>AI Predictions</p><span>AIRPro recommendations</span></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="sg-row"><div class="sg-lbl"><p>Auto Eco-Mode</p><span>Optimize AC automatically</span></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+      <div class="sg">
+        <div class="sg-head">System</div>
+        <div class="sg-row"><div class="sg-lbl"><p>Refresh Interval</p><span>Live data update frequency</span></div><select class="sg-select"><option>30 seconds</option><option>1 minute</option><option>5 minutes</option></select></div>
+        <div class="sg-row"><div class="sg-lbl"><p>Temperature Unit</p><span></span></div><select class="sg-select"><option>Celsius (°C)</option><option>Fahrenheit (°F)</option></select></div>
+      </div>
+      <div class="sg">
+        <div class="sg-head">Security</div>
+        <div class="sg-row"><div class="sg-lbl"><p>Two-Factor Auth</p><span>Require 2FA for all admins</span></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+        <div class="sg-row"><div class="sg-lbl"><p>Audit Logging</p><span>Log all admin actions</span></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="sg-row"><div class="sg-lbl"><p>Force Re-login All</p><span>Invalidate all active sessions</span></div><button class="btn-danger" onclick="alert('All sessions invalidated.')">🔒 Force Re-login All</button></div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div>FAST-NUCES AIRPro Smart Campus System · 6 Campuses · <span id="footerTime"></span></div>
+      <div>Powered by <a href="https://www.olivetech.com.pk" target="_blank">OLIVE Technical Services</a> · <a href="mailto:amir.zahoor@olivetech.com.pk">amir.zahoor@olivetech.com.pk</a> · © 2026</div>
+    </footer>
+
+  </div><!-- /main-wrap -->
+</div><!-- /appShell -->
+
+<script>
+// ═══════════════════════════════
+// DATA
+// ═══════════════════════════════
+const CAMPUSES = [
+  {id:'isb',name:'Islamabad',city:'Islamabad',ac:94,temp:'22.8°C',hum:'58%',occ:76,status:'normal',units:94},
+  {id:'lhr',name:'Lahore',city:'Lahore',ac:88,temp:'25.1°C',hum:'63%',occ:82,status:'warning',units:88},
+  {id:'khi',name:'Karachi',city:'Karachi',ac:76,temp:'27.4°C',hum:'71%',occ:91,status:'critical',units:76},
+  {id:'psh',name:'Peshawar',city:'Peshawar',ac:62,temp:'21.9°C',hum:'54%',occ:64,status:'normal',units:62},
+  {id:'cfg',name:'Chiniot-Faisalabad',city:'Faisalabad',ac:54,temp:'23.3°C',hum:'57%',occ:59,status:'normal',units:54},
+  {id:'cfd',name:'FAST-CFD',city:'Faisalabad',ac:48,temp:'22.6°C',hum:'55%',occ:53,status:'normal',units:48},
+];
+const ROOMS = [
+  {id:'CS-101',name:'Classroom 101',block:'CS Block',floor:'Ground',ac:'AC-CS-001',status:'ON',mode:'Cooling',setC:24,roomC:22.1,energy:'1.2 kWh'},
+  {id:'CS-102',name:'Classroom 102',block:'CS Block',floor:'Ground',ac:'AC-CS-002',status:'ON',mode:'Cooling',setC:24,roomC:23.4,energy:'1.1 kWh'},
+  {id:'EE-201',name:'EE Lecture Hall',block:'Engg Block',floor:'Floor 2',ac:'AC-EE-010',status:'ECO',mode:'Eco',setC:26,roomC:25.8,energy:'0.7 kWh'},
+  {id:'MT-303',name:'Maths Room 303',block:'Maths Block',floor:'Floor 3',ac:'AC-MT-030',status:'OFF',mode:'—',setC:'—',roomC:23.0,energy:'0 kWh'},
+  {id:'AD-106',name:'Admin Room 106',block:'Admin Block',floor:'Floor 1',ac:'AC-AD-006',status:'ON',mode:'Cooling',setC:23,roomC:24.5,energy:'1.3 kWh'},
+  {id:'LH-001',name:'Lecture Hall 1',block:'Main Block',floor:'Ground',ac:'AC-LH-001',status:'ON',mode:'Cooling',setC:22,roomC:21.9,energy:'2.1 kWh'},
+];
+const LABS = [
+  {id:'PHY-L1',name:'Physics Lab 1',block:'Science',floor:'Floor 1',ac:'AC-PH-001',status:'ON',mode:'Cooling',roomC:25.9},
+  {id:'CHEM-L1',name:'Chemistry Lab',block:'Science',floor:'Floor 1',ac:'AC-CH-001',status:'ON',mode:'Cooling',roomC:26.1},
+  {id:'CS-LAB1',name:'CS Lab 1',block:'CS Block',floor:'Ground',ac:'AC-CS-L01',status:'ON',mode:'Cooling',roomC:22.3},
+  {id:'EE-LAB1',name:'EE Lab 1',block:'Engg Block',floor:'Floor 2',ac:'AC-EE-L01',status:'FAULT',mode:'—',roomC:27.8},
+];
+const HALLS = [
+  {id:'LIB-01',name:'Main Library',block:'Central',floor:'Ground',ac:'AC-LIB-01',status:'ON',roomC:21.4,energy:'1.8 kWh'},
+  {id:'CAFE-01',name:'Cafeteria',block:'Main Block',floor:'Ground',ac:'AC-CAF-01',status:'ON',roomC:26.2,energy:'2.2 kWh'},
+  {id:'AUD-01',name:'Main Auditorium',block:'Auditorium',floor:'Ground',ac:'AC-AUD-01',status:'ECO',roomC:24.0,energy:'1.5 kWh'},
+];
+const AC_UNITS = [
+  {id:'AC-ISB-001',campus:'Islamabad',block:'CS Block',room:'CS-101',floor:'G',status:'ON',mode:'Cooling',setC:24,roomC:22.1,kwh:1.2},
+  {id:'AC-ISB-002',campus:'Islamabad',block:'CS Block',room:'CS-102',floor:'G',status:'ON',mode:'Cooling',setC:24,roomC:23.4,kwh:1.1},
+  {id:'AC-ISB-003',campus:'Islamabad',block:'Engg',room:'EE-201',floor:'2',status:'ECO',mode:'Eco',setC:26,roomC:25.8,kwh:0.7},
+  {id:'AC-ISB-004',campus:'Islamabad',block:'Admin',room:'AD-106',floor:'1',status:'ON',mode:'Cooling',setC:23,roomC:24.5,kwh:1.3},
+  {id:'AC-LHR-001',campus:'Lahore',block:'Main Block',room:'LH-101',floor:'G',status:'ON',mode:'Cooling',setC:24,roomC:24.8,kwh:1.4},
+  {id:'AC-LHR-002',campus:'Lahore',block:'Science',room:'PHY-201',floor:'2',status:'ON',mode:'Cooling',setC:24,roomC:25.1,kwh:1.3},
+  {id:'AC-LHR-003',campus:'Lahore',block:'CS Block',room:'CS-301',floor:'3',status:'FAULT',mode:'—',setC:'—',roomC:27.6,kwh:0},
+  {id:'AC-KHI-001',campus:'Karachi',block:'Science',room:'SF-201',floor:'2',status:'ON',mode:'Cooling',setC:22,roomC:27.4,kwh:2.1},
+  {id:'AC-KHI-002',campus:'Karachi',block:'Data Centre',room:'DC-B',floor:'G',status:'ON',mode:'Cooling',setC:18,roomC:31.4,kwh:3.2},
+  {id:'AC-PSH-001',campus:'Peshawar',block:'CS Block',room:'CS-101',floor:'G',status:'ON',mode:'Cooling',setC:24,roomC:21.9,kwh:1.0},
+  {id:'AC-CFG-001',campus:'Chiniot-Faisalabad',block:'Main Block',room:'MB-101',floor:'G',status:'ECO',mode:'Eco',setC:26,roomC:23.3,kwh:0.6},
+];
+const ALERTS_DATA = [
+  {id:'ALT-001',alert:'Server Room Temp Critical',system:'IRIS Ultra',campus:'Karachi',loc:'Data Centre B',time:'3 min ago',sev:'Critical',status:'Open'},
+  {id:'ALT-002',alert:'High Humidity — Physics Lab',system:'IRIS Ultra',campus:'Lahore',loc:'Science Block A2',time:'12 min ago',sev:'High',status:'Open'},
+  {id:'ALT-003',alert:'AC Unit Fault — LH-3',system:'AIRPro AC',campus:'Islamabad',loc:'Lecture Hall 3',time:'25 min ago',sev:'High',status:'Open'},
+  {id:'ALT-004',alert:'Eco-mode: 11 rooms switched',system:'AIRPro AC',campus:'All',loc:'Multiple',time:'38 min ago',sev:'Low',status:'Open'},
+  {id:'ALT-005',alert:'CO₂ Elevated — Chem Lab',system:'FireSense',campus:'Lahore',loc:'Chemistry Lab',time:'1 hr ago',sev:'Medium',status:'Open'},
+];
+const FIRE_SENSORS = [
+  {id:'SM-KHI-01',type:'💨 Smoke',campus:'FAST Karachi',city:'Karachi',loc:'SF-201 · Science 2F',reading:'HIGH',status:'TRIGGERED'},
+  {id:'FS-ISB-01',type:'🔥 Fire',campus:'FAST Islamabad',city:'Islamabad',loc:'Admin Block · GF',reading:'Normal',status:'OK'},
+  {id:'CO-LHR-01',type:'☁️ CO',campus:'FAST Lahore',city:'Lahore',loc:'Chem Lab · 1F',reading:'14 ppm',status:'Warning'},
+  {id:'FS-PSH-01',type:'🔥 Fire',campus:'FAST Peshawar',city:'Peshawar',loc:'Main Block · GF',reading:'Normal',status:'OK'},
+  {id:'SM-LHR-01',type:'💨 Smoke',campus:'FAST Lahore',city:'Lahore',loc:'CS Block · GF',reading:'Normal',status:'OK'},
+  {id:'CO-KHI-01',type:'☁️ CO',campus:'FAST Karachi',city:'Karachi',loc:'Physics Lab · 1F',reading:'28 ppm',status:'ALERT'},
+  {id:'FS-CFG-01',type:'🔥 Fire',campus:'FAST CFD',city:'Faisalabad',loc:'Admin Block · GF',reading:'Normal',status:'OK'},
+  {id:'SM-ISB-01',type:'💨 Smoke',campus:'FAST Islamabad',city:'Islamabad',loc:'Science Block · 1F',reading:'Normal',status:'OK'},
+];
+const ENV_ZONES = [
+  {zone:'Server Room A',campus:'Islamabad',city:'Islamabad',temp:'19.2°C',hum:'48%',aqi:30,co2:380,occ:'Low',status:'Normal'},
+  {zone:'Data Centre B',campus:'Karachi',city:'Karachi',temp:'31.4°C',hum:'51%',aqi:42,co2:412,occ:'Low',status:'Critical'},
+  {zone:'Physics Lab A2',campus:'Lahore',city:'Lahore',temp:'25.9°C',hum:'79%',aqi:58,co2:645,occ:'High',status:'Warning'},
+  {zone:'Record Room 1',campus:'Islamabad',city:'Islamabad',temp:'21.0°C',hum:'53%',aqi:28,co2:395,occ:'Low',status:'Normal'},
+  {zone:'Main Library',campus:'Islamabad',city:'Islamabad',temp:'22.3°C',hum:'55%',aqi:36,co2:420,occ:'High',status:'Normal'},
+  {zone:'Chemistry Lab',campus:'Lahore',city:'Lahore',temp:'26.1°C',hum:'61%',aqi:60,co2:510,occ:'Medium',status:'Warning'},
+  {zone:'CS Lab 1',campus:'Peshawar',city:'Peshawar',temp:'22.5°C',hum:'56%',aqi:34,co2:400,occ:'High',status:'Normal'},
+  {zone:'Auditorium',campus:'Karachi',city:'Karachi',temp:'24.2°C',hum:'62%',aqi:44,co2:480,occ:'High',status:'Normal'},
+];
+const USERS_DATA = [
+  {name:'Admin',email:'admin@fast.edu.pk',role:'Super Admin',campus:'All Campuses',status:'Active',last:'Just now'},
+  {name:'Hassan Raza',email:'h.raza@fast.edu.pk',role:'Campus Admin',campus:'Islamabad',status:'Active',last:'5 min ago'},
+  {name:'Sana Malik',email:'s.malik@fast.edu.pk',role:'Technician',campus:'Lahore',status:'Active',last:'1 hr ago'},
+  {name:'Dr. Farrukh',email:'farrukh@fast.edu.pk',role:'Viewer',campus:'All Campuses',status:'Active',last:'Today'},
+  {name:'Usman Ali',email:'u.ali@fast.edu.pk',role:'Technician',campus:'Karachi',status:'Inactive',last:'3 days ago'},
+];
+
+// ═══════════════════════════════
+// LOGIN
+// ═══════════════════════════════
+document.getElementById('loginPass').addEventListener('keyup',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('loginUser').addEventListener('keyup',e=>{if(e.key==='Enter')doLogin();});
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value.trim();
+  const err=document.getElementById('loginErr');
+  if(u==='admin'&&p==='123456'){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appShell').classList.add('show');
+    initAllData();
+    initDashboardCharts();
+  } else {
+    err.classList.add('show');
+    setTimeout(()=>err.classList.remove('show'),3000);
+  }
+}
+function doLogout(){
+  document.getElementById('appShell').classList.remove('show');
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+
+// ═══════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════
+const pageTitles={
+  dashboard:'Dashboard Overview',campuses:'All Campuses',ac:'AC Management',
+  environment:'Environment — IRIS Ultra',fire:'Fire & Safety — FireSense',
+  energy:'Energy Analytics',alerts:'Alerts & Notifications',reports:'Reports',
+  users:'Users & Roles',settings:'Settings'
+};
+function nav(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);
+  if(pg){pg.classList.add('active');window.scrollTo(0,0);}
+  if(el)el.classList.add('active');
+  document.getElementById('pageTitle').textContent=pageTitles[id]||id;
+  // lazy-init charts
+  if(id==='environment')initEnvCharts();
+  if(id==='energy')initEnergyCharts();
+}
+
+// ═══════════════════════════════
+// CLOCK
+// ═══════════════════════════════
+function tick(){
+  const now=new Date();
+  const t=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const d=now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  const el=document.getElementById('clk');if(el)el.textContent=t;
+  const fe=document.getElementById('footerTime');if(fe)fe.textContent=d+' · '+t;
+  const kw=document.getElementById('kwh-today');if(kw)kw.textContent=Math.floor(42+Math.sin(now/60000)*3)+'';
+}
+tick();setInterval(tick,1000);
+
+// ═══════════════════════════════
+// NOTIFICATION TOGGLE
+// ═══════════════════════════════
+function toggleNotif(){
+  document.getElementById('notifPanel').classList.toggle('show');
+}
+document.addEventListener('click',e=>{
+  const p=document.getElementById('notifPanel');
+  if(p.classList.contains('show')&&!p.contains(e.target)&&!e.target.closest('.tb-icon-btn'))
+    p.classList.remove('show');
+});
+
+// ═══════════════════════════════
+// MODALS
+// ═══════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+let _acModalRow=null;
+function openACModal(btn){
+  _acModalRow=btn?btn.closest('tr'):null;
+  if(_acModalRow){
+    const cells=_acModalRow.querySelectorAll('td');
+    const tempVal=cells[7]?cells[7].textContent.trim():'24';
+    const modeVal=cells[6]?cells[6].textContent.trim():'Cooling';
+    document.getElementById('acTemp').value=isNaN(parseInt(tempVal))?24:parseInt(tempVal);
+    const sel=document.getElementById('acMode');
+    for(let i=0;i<sel.options.length;i++){if(sel.options[i].value===modeVal||sel.options[i].text===modeVal){sel.selectedIndex=i;break;}}
+  }
+  openModal('acModal');
+}
+function saveAC(){
+  if(_acModalRow){
+    const newTemp=document.getElementById('acTemp').value;
+    const newMode=document.getElementById('acMode').value;
+    const cells=_acModalRow.querySelectorAll('td');
+    if(cells[7])cells[7].textContent=newTemp;
+    if(cells[6])cells[6].textContent=newMode;
+    if(cells[5]&&newMode==='Off'){
+      cells[5].innerHTML='<span class="badge b-off"><span class="bdot"></span>OFF</span>';
+    } else if(cells[5]&&newMode==='Eco'){
+      cells[5].innerHTML='<span class="badge b-warn"><span class="bdot"></span>ECO</span>';
+    } else if(cells[5]){
+      cells[5].innerHTML='<span class="badge b-ok"><span class="bdot"></span>ON</span>';
+    }
+  }
+  closeModal('acModal');
+}
+function saveUser(){
+  const nameEl=document.querySelector('#userModal input[type="text"]');
+  const emailEl=document.querySelector('#userModal input[type="email"]');
+  const roleEl=document.querySelector('#userModal select:nth-of-type(1)');
+  const campusEl=document.querySelector('#userModal select:nth-of-type(2)');
+  if(nameEl&&nameEl.value.trim()){
+    USERS_DATA.push({name:nameEl.value.trim(),email:emailEl?emailEl.value.trim():'',role:roleEl?roleEl.value:'Viewer',campus:campusEl?campusEl.value:'All Campuses',status:'Active',last:'Just now'});
+    buildUsersTable(USERS_DATA);
+    if(nameEl)nameEl.value='';if(emailEl)emailEl.value='';
+  }
+  closeModal('userModal');
+}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');}));
+
+// ═══════════════════════════════
+// INIT ALL DATA
+// ═══════════════════════════════
+function initAllData(){
+  buildCampusGrid(CAMPUSES);
+  buildACTable(AC_UNITS);
+  buildEnvTable(ENV_ZONES);
+  buildFireTable(FIRE_SENSORS);
+  buildAlertTable(ALERTS_DATA);
+  buildUsersTable(USERS_DATA);
+}
+
+// ═══════════════════════════════
+// CAMPUS GRID
+// ═══════════════════════════════
+function buildCampusGrid(data){
+  const g=document.getElementById('campusGrid');
+  if(!g)return;
+  g.innerHTML=data.map(c=>{
+    const col=c.status==='critical'?'var(--red)':c.status==='warning'?'var(--amber)':'var(--g)';
+    const badgeCls=c.status==='critical'?'b-alert':c.status==='warning'?'b-warn':'b-ok';
+    const lbl=c.status==='critical'?'Critical':c.status==='warning'?'Warning':'Normal';
+    return`<div class="cc" onclick="showCampusDetail('${c.id}')">
+      <div class="cc-top">
+        <div><div class="cc-name">${c.name}</div><div class="cc-city">${c.city}</div></div>
+        <span class="badge ${badgeCls}"><span class="bdot"></span>${lbl}</span>
+      </div>
+      <div class="cc-stats">
+        <div class="cc-stat"><div class="v">${c.ac}</div><div class="l">AC Units</div></div>
+        <div class="cc-stat"><div class="v">${c.temp}</div><div class="l">Avg Temp</div></div>
+        <div class="cc-stat"><div class="v">${c.hum}</div><div class="l">Humidity</div></div>
+      </div>
+      <div class="cc-barwrap">
+        <div class="cc-barlbl"><span>Occupancy</span><span>${c.occ}%</span></div>
+        <div class="cc-bar"><div class="cc-fill" style="width:${c.occ}%;background:${col}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function filterCampuses(val){
+  buildCampusGrid(val==='all'?CAMPUSES:CAMPUSES.filter(c=>c.status===val));
+}
+
+// ═══════════════════════════════
+// CAMPUS DETAIL
+// ═══════════════════════════════
+function showCampusDetail(id){
+  const c=CAMPUSES.find(x=>x.id===id);
+  if(!c)return;
+  document.getElementById('campusGrid').style.display='none';
+  const filterBar=document.querySelector('#page-campuses > div[style*="flex"]');
+  if(filterBar)filterBar.style.display='none';
+  document.getElementById('campusBreadcrumb').textContent=`🏠 Dashboard › ${c.name}`;
+  document.getElementById('cd-ac').textContent=c.ac;
+  document.getElementById('cd-temp').textContent=c.temp;
+  document.getElementById('cd-hum').textContent=c.hum;
+  document.getElementById('campusDetail').style.display='block';
+  document.getElementById('room-count').textContent=ROOMS.length+' rooms';
+  // Pre-populate all tab tables so switching tabs works instantly
+  buildClassroomTable(ROOMS);
+  buildLabTable(LABS);
+  buildHallTable(HALLS);
+  // Reset filters and go to classrooms tab every time a campus is opened
+  const floorEl=document.getElementById('floorFilter');
+  const statusEl=document.getElementById('acStatusFilter');
+  if(floorEl)floorEl.value='all';
+  if(statusEl)statusEl.value='all';
+  showTab('classrooms');
+}
+function hideCampusDetail(){
+  document.getElementById('campusDetail').style.display='none';
+  document.getElementById('campusGrid').style.display='grid';
+  const filterBar=document.querySelector('#page-campuses > div[style*="flex"]');
+  if(filterBar)filterBar.style.display='flex';
+}
+function showTab(tab){
+  ['classrooms','labs','halls'].forEach(t=>{
+    document.getElementById('tab-'+t+'-content').style.display=t===tab?'block':'none';
+    const btn=document.getElementById('tab-'+t);
+    if(btn){btn.className=t===tab?'btn-primary':'btn-outline';}
+  });
+  applyRoomFilters();
+}
+function applyRoomFilters(){
+  const floorEl=document.getElementById('floorFilter');
+  const statusEl=document.getElementById('acStatusFilter');
+  const floor=floorEl?floorEl.value:'all';
+  const status=statusEl?statusEl.value:'all';
+
+  // figure out which tab is active
+  const activeTab=
+    document.getElementById('tab-classrooms-content').style.display!=='none'?'classrooms':
+    document.getElementById('tab-labs-content').style.display!=='none'?'labs':'halls';
+
+  if(activeTab==='classrooms'){
+    let data=ROOMS;
+    if(floor!=='all') data=data.filter(r=>r.floor===floor);
+    if(status!=='all') data=data.filter(r=>r.status===status);
+    buildClassroomTable(data);
+    const cnt=document.getElementById('room-count');
+    if(cnt)cnt.textContent=data.length+' rooms';
+  } else if(activeTab==='labs'){
+    let data=LABS;
+    if(floor!=='all') data=data.filter(r=>r.floor===floor);
+    if(status!=='all') data=data.filter(r=>r.status===status);
+    buildLabTable(data);
+  } else {
+    let data=HALLS;
+    if(floor!=='all') data=data.filter(r=>r.floor===floor);
+    if(status!=='all') data=data.filter(r=>r.status===status);
+    buildHallTable(data);
+  }
+}
+function buildClassroomTable(data){
+  const b=document.getElementById('classroomBody');if(!b)return;
+  b.innerHTML=data.map(r=>{
+    const sc=r.status==='ON'?'b-ok':r.status==='ECO'?'b-warn':'b-off';
+    const tc=r.roomC>27?'tc-hot':r.roomC>25?'tc-warn':'tc-ok';
+    return`<tr><td><strong>${r.id}</strong></td><td>${r.name}</td><td>${r.block}</td><td>${r.floor}</td><td>${r.ac}</td>
+    <td><span class="badge ${sc}"><span class="bdot"></span>${r.status}</span></td>
+    <td>${r.mode}</td><td>${r.setC}</td><td><span class="temp-c ${tc}">${r.roomC}°C</span></td>
+    <td>${r.energy}</td><td><div class="tbl-actions"><button class="tbl-btn btn-on" onclick="openACModal(this)">Control</button></div></td></tr>`;
+  }).join('');
+}
+function buildLabTable(data){
+  const b=document.getElementById('labBody');if(!b)return;
+  b.innerHTML=data.map(r=>{
+    const sc=r.status==='ON'?'b-ok':r.status==='FAULT'?'b-alert':'b-warn';
+    const tc=r.roomC>27?'tc-hot':r.roomC>25?'tc-warn':'tc-ok';
+    return`<tr><td><strong>${r.id}</strong></td><td>${r.name}</td><td>${r.block}</td><td>${r.floor}</td><td>${r.ac}</td>
+    <td><span class="badge ${sc}"><span class="bdot"></span>${r.status}</span></td>
+    <td>${r.mode}</td><td><span class="temp-c ${tc}">${r.roomC}°C</span></td>
+    <td><button class="tbl-btn btn-on" onclick="openACModal(this)">Control</button></td></tr>`;
+  }).join('');
+}
+function buildHallTable(data){
+  const b=document.getElementById('hallBody');if(!b)return;
+  b.innerHTML=data.map(r=>{
+    const sc=r.status==='ON'?'b-ok':'b-warn';
+    const tc=r.roomC>27?'tc-hot':r.roomC>25?'tc-warn':'tc-ok';
+    return`<tr><td><strong>${r.id}</strong></td><td>${r.name}</td><td>${r.block}</td><td>${r.floor}</td><td>${r.ac}</td>
+    <td><span class="badge ${sc}"><span class="bdot"></span>${r.status}</span></td>
+    <td><span class="temp-c ${tc}">${r.roomC}°C</span></td><td>${r.energy}</td></tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════
+// AC TABLE
+// ═══════════════════════════════
+let acFilter={campus:'all',status:'all'};
+function buildACTable(data){
+  let filtered=data;
+  if(acFilter.campus!=='all')filtered=filtered.filter(u=>u.campus===acFilter.campus);
+  if(acFilter.status!=='all')filtered=filtered.filter(u=>u.status===acFilter.status);
+  const b=document.getElementById('acBody');if(!b)return;
+  const cnt=document.getElementById('acCount');if(cnt)cnt.textContent=filtered.length+' units';
+  b.innerHTML=filtered.map(u=>{
+    const sc=u.status==='ON'?'b-ok':u.status==='ECO'?'b-warn':u.status==='FAULT'?'b-alert':'b-off';
+    const tc=u.roomC>27?'tc-hot':u.roomC>25?'tc-warn':'tc-ok';
+    return`<tr><td><strong>${u.id}</strong></td><td>${u.campus}</td><td>${u.block}</td><td>${u.room}</td><td>${u.floor}</td>
+    <td><span class="badge ${sc}"><span class="bdot"></span>${u.status}</span></td>
+    <td>${u.mode}</td><td>${u.setC}</td><td><span class="temp-c ${tc}">${u.roomC}°C</span></td>
+    <td>${u.kwh} kWh</td>
+    <td><div class="tbl-actions">
+      <button class="tbl-btn btn-on" onclick="openACModal(this)">Control</button>
+      <button class="tbl-btn btn-eco" onclick="setEco(this)">Eco</button>
+    </div></td></tr>`;
+  }).join('');
+}
+function filterAC(type,val){acFilter[type]=val;buildACTable(AC_UNITS);}
+function applyEco(){
+  let count=0;
+  document.querySelectorAll('#acBody tr').forEach(row=>{
+    const cells=row.querySelectorAll('td');
+    if(cells[5]&&cells[5].innerHTML.includes('b-ok')){
+      cells[5].innerHTML='<span class="badge b-warn"><span class="bdot"></span>ECO</span>';
+      cells[6].textContent='Eco';
+      const ecobtn=row.querySelector('.btn-eco');
+      if(ecobtn){ecobtn.textContent='→ON';ecobtn.className='tbl-btn btn-on';}
+      count++;
+    }
+  });
+  const msg=count>0?`Eco-mode applied to ${count} eligible units. Estimated saving: 14%`:'No eligible ON units found for Eco-mode.';
+  alert(msg);
+}
+function setEco(btn){
+  const row=btn.closest('tr');
+  const cells=row.querySelectorAll('td');
+  const isOn=cells[5].innerHTML.includes('b-ok');
+  if(isOn){
+    cells[5].innerHTML='<span class="badge b-warn"><span class="bdot"></span>ECO</span>';
+    cells[6].textContent='Eco';
+    btn.textContent='→ON';btn.className='tbl-btn btn-on';
+  } else {
+    cells[5].innerHTML='<span class="badge b-ok"><span class="bdot"></span>ON</span>';
+    cells[6].textContent='Cooling';
+    btn.textContent='Eco';btn.className='tbl-btn btn-eco';
+  }
+}
+
+// ═══════════════════════════════
+// ENV TABLE
+// ═══════════════════════════════
+function buildEnvTable(data){
+  const b=document.getElementById('envBody');if(!b)return;
+  b.innerHTML=data.map(z=>{
+    const sc=z.status==='Critical'?'b-alert':z.status==='Warning'?'b-warn':'b-ok';
+    const tc=parseFloat(z.temp)>27?'tc-hot':parseFloat(z.temp)>25?'tc-warn':'tc-ok';
+    return`<tr><td><strong>${z.zone}</strong></td><td>${z.campus}</td><td>${z.city}</td>
+    <td><span class="temp-c ${tc}">${z.temp}</span></td><td>${z.hum}</td>
+    <td>${z.aqi}</td><td>${z.co2} ppm</td><td>${z.occ}</td>
+    <td><span class="badge ${sc}"><span class="bdot"></span>${z.status}</span></td></tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════
+// FIRE TABLE
+// ═══════════════════════════════
+function buildFireTable(data){
+  const b=document.getElementById('fireBody');if(!b)return;
+  b.innerHTML=data.map(s=>{
+    const sc=s.status==='TRIGGERED'?'b-alert':s.status==='ALERT'?'b-alert':s.status==='Warning'?'b-warn':'b-ok';
+    return`<tr><td><strong>${s.id}</strong></td><td>${s.type}</td><td>${s.campus}</td><td>${s.city}</td>
+    <td>${s.loc}</td><td>${s.reading}</td>
+    <td><span class="badge ${sc}"><span class="bdot"></span>${s.status}</span></td></tr>`;
+  }).join('');
+}
+function triggerDrill(){
+  alert('🚨 Fire drill triggered! All campus PAs activated. Log entry created.');
+}
+function resolveAlert(){
+  alert('Alert resolved. Log entry created. Teams notified.');
+  document.querySelector('.fire-banner').style.display='none';
+}
+
+// ═══════════════════════════════
+// ALERT TABLE
+// ═══════════════════════════════
+let alertFilter={sev:'all',status:'all'};
+function buildAlertTable(data){
+  const b=document.getElementById('alertBody');if(!b)return;
+  let filtered=data;
+  if(alertFilter.sev!=='all')filtered=filtered.filter(a=>a.sev===alertFilter.sev);
+  if(alertFilter.status!=='all')filtered=filtered.filter(a=>a.status===alertFilter.status);
+  b.innerHTML=filtered.map(a=>{
+    const sc=a.sev==='Critical'?'b-alert':a.sev==='High'?'b-warn':a.sev==='Medium'?'b-blue':'b-off';
+    const ss=a.status==='Open'?'b-warn':'b-ok';
+    return`<tr><td><strong>${a.id}</strong></td><td>${a.alert}</td><td>${a.system}</td>
+    <td>${a.campus}</td><td>${a.loc}</td><td>${a.time}</td>
+    <td><span class="badge ${sc}"><span class="bdot"></span>${a.sev}</span></td>
+    <td><span class="badge ${ss}"><span class="bdot"></span>${a.status}</span></td>
+    <td><div class="tbl-actions">
+      <button class="tbl-btn btn-on" onclick="resolveRow(this)">Resolve</button>
+      <button class="tbl-btn btn-off" onclick="this.closest('tr').remove()">Dismiss</button>
+    </div></td></tr>`;
+  }).join('');
+}
+function filterAlerts(type,val){alertFilter[type]=val;buildAlertTable(ALERTS_DATA);}
+function resolveRow(btn){
+  const row=btn.closest('tr');
+  row.querySelector('td:nth-child(8)').innerHTML='<span class="badge b-ok"><span class="bdot"></span>Resolved</span>';
+  btn.remove();
+}
+function markAllResolved(){
+  document.querySelectorAll('#alertBody tr').forEach(r=>{
+    r.querySelector('td:nth-child(8)').innerHTML='<span class="badge b-ok"><span class="bdot"></span>Resolved</span>';
+    const actions=r.querySelector('.tbl-actions');
+    if(actions)actions.innerHTML='<span style="font-size:11px;color:var(--t3)">Done</span>';
+  });
+}
+
+// ═══════════════════════════════
+// USERS TABLE
+// ═══════════════════════════════
+function buildUsersTable(data){
+  const b=document.getElementById('usersBody');if(!b)return;
+  const roleMap={'Super Admin':'b-alert','Campus Admin':'b-blue','Technician':'b-warn','Viewer':'b-off'};
+  b.innerHTML=data.map(u=>{
+    const sc=u.status==='Active'?'b-ok':'b-off';
+    const rc=roleMap[u.role]||'b-off';
+    return`<tr><td><strong>${u.name}</strong></td><td>${u.email}</td>
+    <td><span class="badge ${rc}"><span class="bdot"></span>${u.role}</span></td>
+    <td>${u.campus}</td>
+    <td><span class="badge ${sc}"><span class="bdot"></span>${u.status}</span></td>
+    <td>${u.last}</td>
+    <td><div class="tbl-actions">
+      <button class="tbl-btn btn-on" onclick="alert('Edit user: ${u.name}')">Edit</button>
+      <button class="tbl-btn btn-off" onclick="toggleUserStatus(this,'${u.name}')">Disable</button>
+    </div></td></tr>`;
+  }).join('');
+}
+function filterUsers(role){
+  buildUsersTable(role==='all'?USERS_DATA:USERS_DATA.filter(u=>u.role===role));
+}
+function toggleUserStatus(btn,name){
+  const row=btn.closest('tr');
+  const statusCell=row.querySelector('td:nth-child(5)');
+  const isActive=statusCell.innerHTML.includes('b-ok');
+  statusCell.innerHTML=isActive?'<span class="badge b-off"><span class="bdot"></span>Inactive</span>':'<span class="badge b-ok"><span class="bdot"></span>Active</span>';
+  btn.textContent=isActive?'Enable':'Disable';
+}
+
+// ═══════════════════════════════
+// EXPORT
+// ═══════════════════════════════
+function downloadBlob(content,filename,mime){
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
+}
+function exportCSV(type){
+  type=type||'ac';
+  let rows=[],filename='airpro-export.csv';
+  if(type==='ac'){
+    filename='airpro-ac-units.csv';
+    rows=[['AC ID','Campus','Block','Room','Floor','Status','Mode','Set °C','Room °C','kWh']];
+    let filtered=AC_UNITS;
+    if(acFilter.campus!=='all')filtered=filtered.filter(u=>u.campus===acFilter.campus);
+    if(acFilter.status!=='all')filtered=filtered.filter(u=>u.status===acFilter.status);
+    filtered.forEach(u=>rows.push([u.id,u.campus,u.block,u.room,u.floor,u.status,u.mode,u.setC,u.roomC,u.kwh]));
+  } else if(type==='env'){
+    filename='airpro-environment.csv';
+    rows=[['Zone','Campus','City','Temp','Humidity','AQI','CO2','Occupancy','Status']];
+    ENV_ZONES.forEach(z=>rows.push([z.zone,z.campus,z.city,z.temp,z.hum,z.aqi,z.co2,z.occ,z.status]));
+  } else if(type==='alerts'){
+    filename='airpro-alerts.csv';
+    rows=[['ID','Alert','System','Campus','Location','Time','Severity','Status']];
+    ALERTS_DATA.forEach(a=>rows.push([a.id,a.alert,a.system,a.campus,a.loc,a.time,a.sev,a.status]));
+  } else if(type==='energy'){
+    filename='airpro-energy.csv';
+    rows=[['Campus','kWh Today','Baseline kWh']];
+    const labels=['Islamabad','Lahore','Karachi','Peshawar','CFD','FAST-CFD'];
+    const actual=[420,380,510,290,240,210];const base=[560,510,680,390,320,280];
+    labels.forEach((l,i)=>rows.push([l,actual[i],base[i]]));
+  } else if(type==='fire'){
+    filename='airpro-fire-sensors.csv';
+    rows=[['Sensor ID','Type','Campus','City','Location','Reading','Status']];
+    FIRE_SENSORS.forEach(s=>rows.push([s.id,s.type.replace(/[^\w\s-]/g,'').trim(),s.campus,s.city,s.loc,s.reading,s.status]));
+  } else if(type==='users'){
+    filename='airpro-users.csv';
+    rows=[['Name','Email','Role','Campus','Status','Last Active']];
+    USERS_DATA.forEach(u=>rows.push([u.name,u.email,u.role,u.campus,u.status,u.last]));
+  } else {
+    filename='airpro-ac-units.csv';
+    rows=[['AC ID','Campus','Block','Room','Floor','Status','Mode','Set °C','Room °C','kWh']];
+    AC_UNITS.forEach(u=>rows.push([u.id,u.campus,u.block,u.room,u.floor,u.status,u.mode,u.setC,u.roomC,u.kwh]));
+  }
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  downloadBlob(csv,filename,'text/csv;charset=utf-8;');
+}
+function exportPDF(reportType){
+  reportType=reportType||'summary';
+  const titles={energy:'Energy Usage Report',temp:'Temperature Logs Report',alerts:'Alert History Report',ac:'AC Performance Report',fire:'Fire & Safety Report',full:'Full Campus Report',summary:'AIRPro Summary Report'};
+  const title=titles[reportType]||'AIRPro Report';
+  const now=new Date().toLocaleString('en-GB');
+  let tableRows='';
+  if(reportType==='energy'){
+    tableRows='<tr><th>Campus</th><th>kWh Today</th><th>Baseline kWh</th><th>Savings</th></tr>';
+    const labels=['Islamabad','Lahore','Karachi','Peshawar','CFD','FAST-CFD'];
+    const actual=[420,380,510,290,240,210];const base=[560,510,680,390,320,280];
+    labels.forEach((l,i)=>tableRows+=`<tr><td>${l}</td><td>${actual[i]}</td><td>${base[i]}</td><td>${Math.round((1-actual[i]/base[i])*100)}%</td></tr>`);
+  } else if(reportType==='alerts'){
+    tableRows='<tr><th>ID</th><th>Alert</th><th>Campus</th><th>Severity</th><th>Status</th></tr>';
+    ALERTS_DATA.forEach(a=>tableRows+=`<tr><td>${a.id}</td><td>${a.alert}</td><td>${a.campus}</td><td>${a.sev}</td><td>${a.status}</td></tr>`);
+  } else if(reportType==='ac'){
+    tableRows='<tr><th>AC ID</th><th>Campus</th><th>Room</th><th>Status</th><th>Room °C</th><th>kWh</th></tr>';
+    AC_UNITS.forEach(u=>tableRows+=`<tr><td>${u.id}</td><td>${u.campus}</td><td>${u.room}</td><td>${u.status}</td><td>${u.roomC}</td><td>${u.kwh}</td></tr>`);
+  } else if(reportType==='fire'){
+    tableRows='<tr><th>Sensor ID</th><th>Type</th><th>Campus</th><th>Location</th><th>Reading</th><th>Status</th></tr>';
+    FIRE_SENSORS.forEach(s=>tableRows+=`<tr><td>${s.id}</td><td>${s.type.replace(/[^\w\s-]/g,'').trim()}</td><td>${s.campus}</td><td>${s.loc}</td><td>${s.reading}</td><td>${s.status}</td></tr>`);
+  } else if(reportType==='temp'){
+    tableRows='<tr><th>Zone</th><th>Campus</th><th>Temp</th><th>Humidity</th><th>AQI</th><th>Status</th></tr>';
+    ENV_ZONES.forEach(z=>tableRows+=`<tr><td>${z.zone}</td><td>${z.campus}</td><td>${z.temp}</td><td>${z.hum}</td><td>${z.aqi}</td><td>${z.status}</td></tr>`);
+  } else {
+    tableRows='<tr><th>Campus</th><th>AC Units</th><th>Avg Temp</th><th>Humidity</th><th>Occupancy</th><th>Status</th></tr>';
+    CAMPUSES.forEach(c=>tableRows+=`<tr><td>${c.name}</td><td>${c.ac}</td><td>${c.temp}</td><td>${c.hum}</td><td>${c.occ}%</td><td>${c.status}</td></tr>`);
+  }
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>${title}</title><style>
+    body{font-family:Arial,sans-serif;margin:40px;color:#0f1f14;}
+    h1{color:#006633;font-size:22px;border-bottom:3px solid #006633;padding-bottom:10px;}
+    p.meta{color:#7a9a84;font-size:12px;margin-bottom:20px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{background:#006633;color:#fff;padding:8px 12px;text-align:left;}
+    td{padding:8px 12px;border-bottom:1px solid #dde8e2;}
+    tr:nth-child(even) td{background:#f2f8f4;}
+    .footer{margin-top:30px;font-size:11px;color:#7a9a84;border-top:1px solid #dde8e2;padding-top:10px;}
+  </style></head><body>
+    <h1>FAST-NUCES AIRPro — ${title}</h1>
+    <p class="meta">Generated: ${now} &nbsp;|&nbsp; System: AIRPro Smart Campus v3.0</p>
+    <table><thead>${tableRows.split('</tr>')[0]}</tr></thead><tbody>${tableRows.split('</tr>').slice(1).join('</tr>')}</tbody></table>
+    <div class="footer">FAST National University · AIRPro Smart Campus System · Powered by OLIVE Technical Services</div>
+  </body></html>`;
+  downloadBlob(html,title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')+'.html','text/html;charset=utf-8;');
+}
+
+// ═══════════════════════════════
+// CHARTS
+// ═══════════════════════════════
+let chartsBuilt={};
+function initDashboardCharts(){
+  if(chartsBuilt.dash)return;chartsBuilt.dash=true;
+  // Energy
+  new Chart(document.getElementById('energyChart'),{
+    type:'bar',
+    data:{
+      labels:['Islamabad','Lahore','Karachi','Peshawar','CFD','FAST-CFD'],
+      datasets:[{
+        label:'kWh Today',
+        data:[420,380,510,290,240,210],
+        backgroundColor:'rgba(0,102,51,0.8)',
+        borderRadius:6,borderSkipped:false
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11}}}}}
+  });
+  // Temp
+  new Chart(document.getElementById('tempChartMain'),{
+    type:'line',
+    data:{
+      labels:['Islamabad','Lahore','Karachi','Peshawar','CFD','FAST-CFD'],
+      datasets:[{
+        label:'Avg Temp (°C)',
+        data:[22.8,25.1,27.4,21.9,23.3,22.6],
+        borderColor:'#006633',backgroundColor:'rgba(0,102,51,0.07)',
+        fill:true,tension:0.4,pointRadius:5,pointBackgroundColor:'#006633',borderWidth:2
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11}}}}}
+  });
+  // Donut
+  new Chart(document.getElementById('acDonut'),{
+    type:'doughnut',
+    data:{
+      labels:['Active','Eco Mode','Off'],
+      datasets:[{data:[347,89,64],backgroundColor:['#006633','#c8a84b','#dde8e2'],borderWidth:2,borderColor:'#fff',hoverOffset:6}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}
+  });
+}
+
+function initEnvCharts(){
+  if(chartsBuilt.env)return;chartsBuilt.env=true;
+  const hrs=Array.from({length:24},(_,i)=>i+':00');
+  new Chart(document.getElementById('tempChart24'),{
+    type:'line',
+    data:{labels:hrs,datasets:[{label:'°C',data:[21,21,21,21,22,22,23,24,24,25,25,26,26,25,25,24,24,24,23,23,23,22,22,21],
+      borderColor:'#006633',backgroundColor:'rgba(0,102,51,0.07)',fill:true,tension:0.4,pointRadius:0,borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{maxTicksLimit:8,font:{size:10}},grid:{display:false}},y:{ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.04)'}}}}
+  });
+  new Chart(document.getElementById('humChart24'),{
+    type:'line',
+    data:{labels:hrs,datasets:[{label:'%',data:[55,54,54,55,56,57,58,60,61,62,63,65,64,63,62,61,60,59,58,57,57,56,55,55],
+      borderColor:'#1a5db5',backgroundColor:'rgba(26,93,181,0.07)',fill:true,tension:0.4,pointRadius:0,borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{maxTicksLimit:8,font:{size:10}},grid:{display:false}},y:{ticks:{font:{size:11}},grid:{color:'rgba(0,0,0,0.04)'}}}}
+  });
+}
+
+function initEnergyCharts(){
+  if(chartsBuilt.energy)return;chartsBuilt.energy=true;
+  new Chart(document.getElementById('energyCampus'),{
+    type:'bar',
+    data:{
+      labels:['Islamabad','Lahore','Karachi','Peshawar','CFD','FAST-CFD'],
+      datasets:[
+        {label:'AIRPro (kWh)',data:[420,380,510,290,240,210],backgroundColor:'rgba(0,102,51,0.8)',borderRadius:5,borderSkipped:false},
+        {label:'Baseline (kWh)',data:[560,510,680,390,320,280],backgroundColor:'rgba(200,168,75,0.4)',borderRadius:5,borderSkipped:false}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11}}}}}
+  });
+  new Chart(document.getElementById('energyWeekly'),{
+    type:'line',
+    data:{
+      labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets:[
+        {label:'AIRPro',data:[3820,3650,3780,3500,3420,2900,2750],borderColor:'#006633',backgroundColor:'rgba(0,102,51,0.07)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#006633',borderWidth:2},
+        {label:'Baseline',data:[5100,4980,5050,4900,4860,4200,4050],borderColor:'#c8a84b',borderDash:[5,4],backgroundColor:'transparent',tension:0.4,pointRadius:3,borderWidth:1.5}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},callback:v=>(v/1000).toFixed(1)+'k'}}}}
+  });
+}
+</script>
+</body>
+</html>
